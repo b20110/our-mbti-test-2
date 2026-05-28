@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영상 매체를 통한 전연령 맞춤형 MBTI 검사</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Gothic+Coding&family=Poor+Story&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-pastel: #F4F7F6;
+            --card-bg: #FFFFFF;
+            --primary-pink: #FFCCD5;
+            --primary-blue: #D8E2DC;
+            --pastel-yellow: #FFE5D9;
+            --pastel-purple: #E8AEB7;
+            --text-color: #4A4A4A;
+            --accent-coral: #FF9999;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Poor Story', 'Gaegu', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-pastel);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 650px;
+            border-radius: 30px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+            padding: 35px;
+            text-align: center;
+            position: relative;
+            border: 4px solid #FFF;
+        }
+
+        /* 공통 애니메이션 효과 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: #5E503F;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            color: #8A817C;
+            margin-bottom: 30px;
+        }
+
+        /* 웰컴 스크린 / 나이 선택 */
+        .character-banner {
+            font-size: 4rem;
+            margin-bottom: 25px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .btn-group-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            background: var(--primary-pink);
+            color: #5E503F;
+            border: none;
+            padding: 18px 25px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 0px #E0AAB4;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0px #E0AAB4;
+            filter: brightness(1.03);
+        }
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0px #E0AAB4;
+        }
+        .btn.blue {
+            background: var(--primary-blue);
+            box-shadow: 0 5px 0px #BCCAC2;
+        }
+        .btn.blue:hover {
+            box-shadow: 0 7px 0px #BCCAC2;
+        }
+        .btn.blue:active {
+            box-shadow: 0 2px 0px #BCCAC2;
+        }
+
+        /* 테스트 레이아웃 */
+        .hidden { display: none !important; }
+
+        .progress-container {
+            width: 100%;
+            background-color: #EFEFEF;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            height: 15px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-pink), var(--accent-coral));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* 타이머 이모지 컴포넌트 */
+        .timer-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #FFF5F5;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-flex;
+            border: 2px dashed var(--accent-coral);
+        }
+        .timer-emoji {
+            font-size: 2rem;
+            transition: all 0.3s ease;
+        }
+        .timer-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 시각 자료 박스 (13세 이하용 애니메이션/일러스트 대용 그래픽 박스) */
+        .media-box {
+            width: 100%;
+            height: 200px;
+            background: #FAFAFA;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            border: 3px dashed #DDD;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .media-box svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            line-height: 1.4;
+            word-break: keep-all;
+        }
+
+        /* 답변 척도 레이아웃 */
+        .likert-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .likert-option {
+            background: #F9F9F9;
+            border: 2px solid #EAEAEA;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-weight: bold;
+        }
+        .likert-option:hover {
+            background: #FFFEEA;
+            border-color: #FFD166;
+            transform: scale(1.01);
+        }
+
+        /* 결과 화면 디자인 */
+        .result-card {
+            background: linear-gradient(135deg, #FFF6F6 0%, #F0F4F8 100%);
+            border-radius: 25px;
+            padding: 30px;
+            margin-top: 20px;
+            border: 2px solid #FFF;
+        }
+        .mbti-title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #4A4A4A;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #FFF;
+        }
+        .mbti-character {
+            font-size: 5rem;
+            margin-bottom: 15px;
+        }
+        .mbti-desc {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #6C757D;
+            margin-bottom: 20px;
+        }
+        .mbti-tags {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+        .tag {
+            background: #FFF;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #E0E0E0;
+        }
+        .result-details {
+            text-align: left;
+            background: #FFF;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container fade-in">
+        <div id="screen-start">
+            <div class="character-banner">✨🦄🐶🐱✨</div>
+            <h1>영상 매체를 통한<br>맞춤형 MBTI 검사</h1>
+            <p class="subtitle">나에게 딱 맞는 직관적이고 재미있는 성격 테스트</p>
+            <div class="btn-group-vertical">
+                <button class="btn" onclick="startTest('child')">🧒 13살 이하 어린이 (그림/영상 버전)</button>
+                <button class="btn blue" onclick="startTest('adult')">🧑 14살 이상 청소년/성인 (텍스트 버전)</button>
+            </div>
+        </div>
+
+        <div id="screen-test" class="hidden">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="timer-wrapper">
+                <div class="timer-emoji" id="timer-emoji">😊</div>
+                <div class="timer-text" id="timer-text">30초</div>
+            </div>
+
+            <div id="media-area" class="media-box hidden">
+                <div id="media-content"></div>
+            </div>
+
+            <div class="question-text" id="question-text">질문 로딩 중...</div>
+
+            <div class="likert-container" id="answer-options">
+                </div>
+        </div>
+
+        <div id="screen-result" class="hidden">
+            <h1>당신의 성격 검사 결과</h1>
+            <div class="result-card">
+                <div class="mbti-character" id="result-emoji">🦄</div>
+                <div class="mbti-title" id="result-mbti">ENFP</div>
+                <div class="mbti-desc" id="result-name">재기발랄한 활동가 (스파크형)</div>
+                <div class="mbti-tags" id="result-tags">
+                    </div>
+                <div class="result-details" id="result-details">
+                    상세 성향 결과 분석을 불러오는 중입니다...
+                </div>
+            </div>
+            <button class="btn blue" style="margin-top: 25px; width: 100%;" onclick="location.reload()">🔄 다시 테스트하기</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 문항 설계 가이드 (3인 프로젝트 개발용)
+         * - E/I, N/S, T/F, P/J 각각 15문항씩 총 60문항 배정 구조.
+         * - 대량의 텍스트로 인한 코드 유실을 방지하고자 핵심 대표 문항들을 선별 배치해 두었습니다.
+         * - 60문항으로 바로 확장하려면 각 배열 내부 주석 위치에 규칙대로 오브젝트를 복사-붙여넣기 하시면 됩니다.
+         */
+
+        const childQuestions = [
+            // === E vs I (외향 / 내향) ===
+            {
+                id: "c_ei_1", type: "EI", score: 2, // 양수면 E 성향 가산, 음수면 I 성향 가산
+                text: "친구들이 북적북적 모여 있는 놀이터에서 같이 어울려 노는 게 좋아, 아니면 조용한 방에서 나 혼자 장난감을 가지고 노는 게 좋아?",
+                graphic: 'playground' // 매칭 그래픽 타입
+            },
+            {
+                id: "c_ei_2", type: "EI", score: 2,
+                text: "새로운 학년이 되어서 처음 본 친구가 생겼을 때 먼저 다가가서 '안녕! 같이 놀자!'라고 쉽게 말할 수 있어?",
+                graphic: 'hello'
+            },
+            // === N vs S (직관 / 감각) ===
+            {
+                id: "c_ns_1", type: "NS", score: 2,
+                text: "하늘에 둥둥 떠 있는 하얀 구름을 보면 달콤하고 폭신한 솜사탕 같아서 떼어내 먹고 싶다는 기발한 상상을 자주 해?",
+                graphic: 'cloud'
+            },
+            {
+                id: "c_ns_2", type: "NS", score: -2, // 음수는 S형 유도 (구조적 사실에 집중)
+                text: "그림을 그릴 때 상상 속의 우주 괴물이나 마법 세계를 그리는 것보다 내 눈앞에 있는 가족이나 강아지를 똑같이 그리는 게 더 좋아?",
+                graphic: 'drawing'
+            },
+            // === T vs F (사고 / 감정) ===
+            {
+                id: "c_tf_1", type: "TF", score: -2, // 음수는 F형 유도 (따뜻한 위로와 공감)
+                text: "친구가 가다가 꽈당 넘어졌을 때 '너 어디서 어떻게 넘어진 거야?'라는 질문보다 '앗! 많이 아프지? 호 해줄까?'라는 걱정이 먼저 나와?",
+                graphic: 'hurt'
+            },
+            {
+                id: "c_tf_2", type: "TF", score: 2,
+                text: "친구가 조립 로봇을 만들다가 실패해서 울고 있을 때 같이 슬퍼해 주기보다는 로봇 설명서를 보고 어디가 틀렸는지 가르쳐 주고 싶어?",
+                graphic: 'robot'
+            },
+            // === P vs J (자율 / 계획) ===
+            {
+                id: "c_pj_1", type: "PJ", score: -2, // 음수는 J형 유도 (철저한 계획과 정돈)
+                text: "방을 어지럽히며 신나게 놀고 난 다음, 엄마가 정리하라고 하기 전에 내가 놀던 장난감들을 원래 있던 자리에 스스로 꼼꼼하게 정리해?",
+                graphic: 'clean'
+            },
+            {
+                id: "c_pj_2", type: "PJ", score: 2,
+                text: "주말에 가족들이랑 놀러 갈 때 계획표가 없어도 그냥 발길 닿는 대로 신나게 출발하는 게 훨씬 재미있고 설레?",
+                graphic: 'trip'
+            }
+            /* [분석가/아키텍트 조장 가이드] 위와 같은 규칙으로 각 차원당 총 15문제가 되도록 오브젝트를 복사하여 배열을 확장하세요. */
+        ];
+
+        const adultQuestions = [
+            // === E vs I (외향 / 내향) ===
+            {
+                id: "a_ei_1", type: "EI", score: 2,
+                text: "주말이나 휴일에 집에서 혼자 온전히 휴식을 취하며 시간을 보내는 것보다 사람들을 만나 이야기하며 스트레스를 푸는 편이다."
+            },
+            {
+                id: "a_ei_2", type: "EI", score: 2,
+                text: "여러 사람과 대화를 나눌 때 주로 듣기만 하기보다 먼저 화제를 던지거나 분위기를 주도하는 경우가 많다."
+            },
+            // === N vs S (직관 / 감각) ===
+            {
+                id: "a_ns_1", type: "NS", score: 2,
+                text: "영화나 소설을 볼 때 눈앞에 보여지는 사실적인 스토리라인 자체보다 그 이면에 숨겨진 은유나 결말에 대한 상상을 즐긴다."
+            },
+            {
+                id: "a_ns_2", type: "NS", score: -2,
+                text: "새로운 가전제품이나 복잡한 가구를 샀을 때 감으로 먼저 작동해보려 하기보다는 동봉된 설명서를 정독하고 순서대로 실행한다."
+            },
+            // === T vs F (사고 / 감정) ===
+            {
+                id: "a_tf_1", type: "TF", score: 2,
+                text: "친구가 심각한 고민을 얘기할 때 감정적으로 깊이 위로해 주기보다는 실질적으로 문제를 해결해 줄 수 있는 대안을 먼저 구상한다."
+            },
+            {
+                id: "a_tf_2", type: "TF", score: -2,
+                text: "어떤 의견 충돌이 발생했을 때 논리적 정당성을 가려내 이기는 것보다 주변 사람들과의 관계가 상하지 않도록 타협하는 것이 중요하다."
+            },
+            // === P vs J (자율 / 계획) ===
+            {
+                id: "a_pj_1", type: "PJ", score: -2,
+                text: "여행을 가거나 프로젝트를 시작할 때 세부 시간 단위로 꼼꼼한 계획표를 짜 두어야 마음이 편안하고 안정된다."
+            },
+            {
+                id: "a_pj_2", type: "PJ", score: 2,
+                text: "정해진 규칙이나 딱딱한 일정표에 얽매이기보다는 그날그날 유동적인 상황에 맞추어 즉흥적으로 처리하는 것을 선호한다."
+            }
+            /* [분석가/아키텍트 조장 가이드] 위와 같은 규칙으로 성인용 문항도 차원당 총 15문제가 되도록 배열 데이터를 추가 확장하세요. */
+        ];
+
+        // 16가지 MBTI 결과 캐릭터 딕셔너리 데이터 (귀여운 캐릭터 콘셉트 반영)
+        const mbtiCharacters = {
+            "ENFP": { emoji: "🦄", name: "스파크 뿜뿜, 호기심 많은 유니콘", tags: ["상상력왕", "활기찬", "자유로운"], desc: "창의적이고 항상 새로운 에너지가 넘쳐요! 친구들을 기쁘게 해주는 재주를 가졌고 주변에 긍정적인 비타민 같은 역할을 해주는 멋진 사람입니다." },
+            "ENFJ": { emoji: "🦁", name: "다정다감 정의로운 대장 사자", tags: ["친절함", "리더십", "공감왕"], desc: "따뜻하고 책임감이 아주 강해요. 어려운 처지에 놓인 주변 친구들을 솔선수범해서 도와주며 팀원들을 든든하게 이끌어가는 최고의 PM 스타일입니다." },
+            "ENTP": { emoji: "🦊", name: "똑똑하고 호기심 많은 천재 여우", tags: ["아이디어맨", "토론왕", "말재주"], desc: "머릿속에 기발하고 신선한 생각이 끊임없이 샘솟아요. 평범한 길보다는 독창적이고 재미있는 새로운 해결 방식을 찾아내는 지혜를 발휘하곤 합니다." },
+            "ENTJ": { emoji: "🦅", name: "정확하고 용감한 대장 독수리", tags: ["카리스마", "계획적", "추진력"], desc: "목표를 정하면 망설임 없이 아주 빠르게 직진해요! 체계적이고 이성적인 판단 능력을 바탕으로 어려운 문제 상황도 막힘없이 멋지게 해결해 나갑니다." },
+            "ESFP": { emoji: "🐬", name: "초긍정 인기쟁이 돌고래", tags: ["분위기메이커", "유쾌함", "사교성"], desc: "지금 이 순간이 가장 즐거운 에너자이저입니다! 춤, 노래, 운동 등 재미있는 활동을 좋아하며 주위 사람들을 행복하게 만들어 주는 특별한 비타민입니다." },
+            "ESFJ": { emoji: "🐻", name: "친절하고 다정한 수호천사 곰돌이", tags: ["배려심", "협동심", "약속철저"], desc: "주변 친구들이 무엇을 필요로 하는지 가장 잘 알아채고 따뜻하게 챙겨줍니다. 약속을 소중히 여기며 모둠 활동을 평화롭게 조율하는 능력이 뛰어납니다." },
+            "ESTP": { emoji: "🐯", name: "모험을 즐기는 날쌘돌이 호랑이", tags: ["행동파", "스피드", "실전강함"], desc: "말보다는 행동이 먼저 움직이는 실전형 인재입니다! 상황 대처 능력이 무척 빠르고 위기 상황이 다가와도 당황하지 않고 시원하게 극복해 내는 에너지가 장점입니다." },
+            "ESTJ": { emoji: "🐺", name: "룰을 지키는 꼼꼼한 반장 늑대", tags: ["책임감", "규칙수호", "깔끔함"], desc: "해야 할 일은 완벽하고 성실하게 끝마치는 최고의 살림꾼입니다. 공정하고 질서 있는 환경을 좋아하며, 맡겨진 임무에 대해 끝까지 책임을 다하는 신뢰를 줍니다." },
+            "INFP": { emoji: "🐰", name: "마음이 따뜻한 꿈꾸는 아기 토끼", tags: ["감수성", "예술가", "사려깊음"], desc: "마음이 무척 여리고 따뜻하며, 남들에게 상처를 주지 않기 위해 늘 배려해요. 글, 그림, 음악 등을 통해 자신만의 아름다운 상상 세계를 멋지게 표현할 줄 압니다." },
+            "INFJ": { emoji: "🦉", name: "비밀을 간직한 지혜로운 올빼미", tags: ["통찰력", "사색가", "은은한열정"], desc: "차분하고 조용해 보이지만 가슴속에는 뚜렷한 가치관과 따뜻한 열정을 품고 있어요. 친구들의 고민을 진지하게 깊이 들어주어 마음의 평화를 주는 편안함을 지녔습니다." },
+            "INTP": { emoji: "🐨", name: "생각이 엄청 많은 척척박사 코알라", tags: ["분석가", "아이디어", "조용한천재"], desc: "어떤 현상이나 원리에 대해 끊임없이 탐구하고 논리적으로 인과관계를 밝혀내길 좋아해요. 혼자 사색하며 남들이 놓치기 쉬운 허점을 날카롭게 분석해 내는 매력이 있습니다." },
+            "INTJ": { emoji: "🐼", name: "치밀하고 전략적인 마스터 판다", tags: ["독립심", "완벽주의", "전략가"], desc: "지적 호기심이 매우 높고 자신만의 확고한 기준을 가지고 있습니다. 겉으로는 차가워 보일 수 있어도 아주 멀리 내다보며 체계적인 청사진을 완성하는 완벽한 아키텍트형입니다." },
+            "ISFP": { emoji: "🐱", name: "평화를 사랑하는 예술가 고양이", tags: ["유유자적", "미적감각", "양보대왕"], desc: "갈등과 싸움을 싫어하며 모두와 평화롭게 어우러지는 유연함을 가졌습니다. 자연, 동물, 예술을 사랑하며 마음이 따뜻하고 따스한 감수성의 소유자입니다." },
+            "ISFJ": { emoji: "🐹", name: "은은하게 도와주는 지킴이 햄스터", tags: ["성실함", "서포터", "기억력왕"], desc: "뒤에서 묵묵하게 다른 이들을 서포트해 주는 소중한 조력자입니다. 자신이 맡은 일을 조용히 성실하게 완수하며, 친구들의 사소한 세부 사항까지 기억해 주는 섬세함을 가졌습니다." },
+            "ISTP": { emoji: "🦥", name: "맥가이버 만능 재주꾼 나무늘보", tags: ["만능형", "효율주의", "침착함"], desc: "과도한 에너지 소비는 아끼되, 필요할 때 최고의 효율을 발휘하는 능력자입니다. 도구를 다루거나 손재주가 뛰어나며 복잡한 상황에서도 감정에 휘둘리지 않고 침착합니다." },
+            "ISTJ": { emoji: "🐢", name: "청렴결백 바르고 성실한 거북이", tags: ["정확성", "신용가", "기록왕"], desc: "한 번 뱉은 말은 무조건 지키는 최고의 신용을 자랑합니다. 데이터와 명확한 사실을 기반으로 행동하며 흐트러짐 없이 정돈된 삶의 규칙을 추구하는 올곧은 성격의 소유자입니다." }
+        };
+
+        // 인라인 SVG 그래픽 딕셔너리 (어린이용 직관적인 이해를 돕기 위함)
+        const svgGraphics = {
+            playground: `<svg viewBox="0 0 200 100"><circle cx="40" cy="50" r="15" fill="#FFADAC"/><circle cx="75" cy="45" r="12" fill="#B5EAEA"/><circle cx="110" cy="55" r="14" fill="#FFE5D9"/><rect x="140" y="40" width="30" height="30" rx="5" fill="#A7BBC7"/><text x="155" y="60" font-size="12" text-anchor="middle">🏠</text><text x="75" y="85" font-size="12" text-anchor="middle" fill="#666">놀이터 vs 혼자 방</text></svg>`,
+            hello: `<svg viewBox="0 0 200 100"><circle cx="60" cy="50" r="18" fill="#FFCCD5"/><circle cx="140" cy="50" r="18" fill="#D8E2DC"/><path d="M 80 50 L 120 50" stroke="#888" stroke-width="2" stroke-dasharray="4"/><text x="100" y="40" font-size="14" text-anchor="middle" fill="#333">"안녕!"</text></svg>`,
+            cloud: `<svg viewBox="0 0 200 100"><path d="M50 60 q10 -20 30 -10 q20 -20 40 0 q20 -10 20 10 q10 10 -10 20 L 50 80 Z" fill="#E8AEB7"/><text x="100" y="55" font-size="14" text-anchor="middle">🍭?</text></svg>`,
+            drawing: `<svg viewBox="0 0 200 100"><rect x="30" y="20" width="60" height="50" fill="#FFF" stroke="#AAA"/><circle cx="60" cy="45" r="15" fill="none" stroke="#FF9999" stroke-width="3"/><rect x="110" y="20" width="60" height="50" fill="#FFF" stroke="#AAA"/><path d="M 120 30 L 160 60 M 160 30 L 120 60" stroke="#A7BBC7" stroke-width="3"/></svg>`,
+            hurt: `<svg viewBox="0 0 200 100"><circle cx="60" cy="60" r="15" fill="#DDD"/><text x="60" y="65" font-size="16" text-anchor="middle">😭</text><text x="140" y="55" font-size="14" text-anchor="middle" fill="#FF9999">"괜찮아?❤️"</text></svg>`,
+            robot: `<svg viewBox="0 0 200 100"><rect x="40" y="40" width="30" height="30" fill="#B5EAEA"/><rect x="45" y="25" width="20" height="15" fill="#A7BBC7"/><line x1="110" y1="30" x2="160" y2="70" stroke="#666" stroke-width="2"/><text x="135" y="25" font-size="12" text-anchor="middle">설명서 📋</text></svg>`,
+            clean: `<svg viewBox="0 0 200 100"><rect x="40" y="30" width="40" height="40" fill="#FFE5D9" stroke="#E0AAB4"/><text x="60" y="55" font-size="16" text-anchor="middle">🧸</text><path d="M 110 60 L 150 60 L 130 30 Z" fill="#D8E2DC"/><text x="130" y="80" font-size="11" text-anchor="middle" fill="#666">제자리 정리정돈</text></svg>`,
+            trip: `<svg viewBox="0 0 200 100"><rect x="30" y="30" width="50" height="40" rx="5" fill="#B5EAEA"/><circle cx="45" cy="75" r="8"/><circle cx="65" cy="75" r="8"/><text x="130" y="55" font-size="16" text-anchor="middle">지도 없이 출발! 🧭</text></svg>`
+        };
+
+        // 상태 변수 관리용 구조
+        let currentMode = 'child'; 
+        let questionPool = [];
+        let currentIndex = 0;
+        let scores = { EI: 0, NS: 0, TF: 0, PJ: 0 };
+        let timerInterval = null;
+        let timeLeft = 30;
+
+        // 리커트 가중치 배율 (매우 그렇다 ~ 매우 아니다)
+        const scaleWeights = [1.0, 0.5, 0.0, -0.5, -1.0];
+        const optionLabels = ["매우 그렇다", "그렇다", "보통이다", "아니다", "매우 아니다"];
+
+        // 테스트 시작 함수
+        function startTest(mode) {
+            currentMode = mode;
+            questionPool = mode === 'child' ? childQuestions : adultQuestions;
+            currentIndex = 0;
+            scores = { EI: 0, NS: 0, TF: 0, PJ: 0 };
+
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-test').classList.remove('hidden');
+
+            if (currentMode === 'child') {
+                document.getElementById('media-area').classList.remove('hidden');
+            } else {
+                document.getElementById('media-area').classList.add('hidden');
+            }
+
+            renderQuestion();
+        }
+
+        // 질문 렌더링 엔진
+        function renderQuestion() {
+            if (currentIndex >= questionPool.length) {
+                clearInterval(timerInterval);
+                showResult();
+                return;
+            }
+
+            // 프로그레스 바 갱신
+            const progressPercent = (currentIndex / questionPool.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            const currentQ = questionPool[currentIndex];
+            document.getElementById('question-text').innerText = `${currentIndex + 1}. ${currentQ.text}`;
+
+            // 어린이 모드일 경우 맞춤 시각화 일러스트 바인딩
+            if (currentMode === 'child' && currentQ.graphic) {
+                const mediaContent = document.getElementById('media-content');
+                mediaContent.innerHTML = svgGraphics[currentQ.graphic] || '✨⭐✨';
+            }
+
+            // 리커트 선택지 버튼 동적 생성
+            const optionsContainer = document.getElementById('answer-options');
+            optionsContainer.innerHTML = '';
+            
+            optionLabels.forEach((label, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'likert-option';
+                btn.innerText = label;
+                btn.onclick = () => handleAnswer(idx);
+                optionsContainer.appendChild(btn);
+            });
+
+            // 30초 타임아웃 타이머 시작
+            startTimer();
+        }
+
+        // 타이머 로직 및 이모지 실시간 변화 (기획서 반영 기믹)
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 30;
+            updateTimerUI();
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    // 시간 초과 시 무응답(보통이다, 가중치 0) 처리 후 자동 다음 문항 이동
+                    handleAnswer(2); 
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            const emojiEl = document.getElementById('timer-emoji');
+            const textEl = document.getElementById('timer-text');
+            textEl.innerText = `${timeLeft}초`;
+
+            // 시간에 따른 흐름 직관화 이모지 변화 가중치
+            if (timeLeft > 20) {
+                emojiEl.innerText = "😊"; // 여유로움
+            } else if (timeLeft > 10) {
+                emojiEl.innerText = "😐"; // 보통
+            } else if (timeLeft > 5) {
+                emojiEl.innerText = "😰"; // 긴장/땀방울
+            } else {
+                emojiEl.innerText = "😭"; // 촉박함/우는 얼굴
+            }
+        }
+
+        // 답변 가중치 계산 합산
+        function handleAnswer(optionIndex) {
+            const currentQ = questionPool[currentIndex];
+            const weight = scaleWeights[optionIndex];
+            
+            // 질문의 고유 방향성 점수와 리커트 응답률 결합 계산
+            scores[currentQ.type] += (currentQ.score * weight);
+
+            currentIndex++;
+            renderQuestion();
+        }
+
+        // 결과 산출 연산 및 스크린 출력
+        function showResult() {
+            document.getElementById('screen-test').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            // 4개 차원 분기 결정 연산
+            let mbtiResult = "";
+            mbtiResult += (scores.EI >= 0) ? "E" : "I";
+            mbtiResult += (scores.NS >= 0) ? "N" : "S";
+            mbtiResult += (scores.TF >= 0) ? "T" : "F";
+            mbtiResult += (scores.PJ >= 0) ? "P" : "J";
+
+            const character = mbtiCharacters[mbtiResult] || { emoji: "⭐", name: "신비로운 탐험가", tags: ["독창적"], desc: "다재다능한 성향의 소유자입니다." };
+
+            document.getElementById('result-mbti').innerText = mbtiResult;
+            document.getElementById('result-emoji').innerText = character.emoji;
+            document.getElementById('result-name').innerText = character.name;
+            document.getElementById('result-details').innerText = character.desc;
+
+            // 태그 그룹 바인딩
+            const tagsContainer = document.getElementById('result-tags');
+            tagsContainer.innerHTML = '';
+            character.tags.forEach(tag => {
+                const tagSpan = document.createElement('span');
+                tagSpan.className = 'tag';
+                tagSpan.innerText = `#${tag}`;
+                tagsContainer.appendChild(tagSpan);
+            });
+        }
+    </script>
+</body>
+</html>
